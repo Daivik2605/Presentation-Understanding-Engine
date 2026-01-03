@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+
+python-pptx
+
+langchain-core
+langchain-ollama
+ollama
