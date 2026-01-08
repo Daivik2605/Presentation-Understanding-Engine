@@ -30,6 +30,7 @@ The system is exposed via a **FastAPI backend** and returns structured outputs s
 - Modular orchestration layer (parser, AI chains, processor)
 - FastAPI backend with interactive Swagger UI
 - Local LLM inference using Ollama (cloud-ready design)
+- Multilingual support (English, French, Hindi)
 
 ---
 
