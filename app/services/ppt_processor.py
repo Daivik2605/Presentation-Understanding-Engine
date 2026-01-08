@@ -1,6 +1,7 @@
 from app.services.ppt_parser import parse_ppt
 from app.services.narration_chain import narration_chain
 from app.services.qa_chain import qa_chain
+from app.services.qa_validator import validate_and_fix_mcqs, validate_mcq_language
 
 def process_ppt(ppt_path: str, language: str="en", max_slides: int=1) -> list[dict]:
     """
@@ -41,8 +42,24 @@ def process_ppt(ppt_path: str, language: str="en", max_slides: int=1) -> list[di
                 "language": language
             })
 
-            # Ensure API never crashes
-            slide_result["qa"] = str(qa_raw)
-            
+            validated_qa = validate_and_fix_mcqs(str(qa_raw))
+            slide_result["qa"] = validated_qa
+
+            # Retry once if schema invalid OR language mismatch
+            if (
+                not validated_qa["questions"]
+                or not validate_mcq_language(validated_qa, language)
+            ):
+                qa_retry = qa_chain.invoke({
+                    "slide_text": slide["text"],
+                    "language": language
+                })
+                validated_qa = validate_and_fix_mcqs(str(qa_retry))
+            # FINAL enforcement — do NOT allow wrong language
+            if not validate_mcq_language(validated_qa, language):
+                validated_qa = {"questions": []}
+
+            slide_result["qa"] = validated_qa
+
         results.append(slide_result)
     return results

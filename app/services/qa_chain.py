@@ -9,11 +9,14 @@ prompt = PromptTemplate(
 You are an assessment generator.
 
 TASK:
-Generate assessment questions ONLY.
+Generate at least 1 valid MCQ question based on the provided slide content.
 
 STRICT RULES (MANDATORY):
+- The "answer" MUST be exactly one of the provided options
+- ALL questions and options MUST be in {language}
 - Generate ALL text strictly in {language}
 - If {language} is not "en", DO NOT use English words at all
+- All questions, options, and answers MUST be in {language}.
 - Output ONLY valid JSON
 - Output MUST start with '{{' and end with '}}'
 - Do NOT include any text before or after the JSON
