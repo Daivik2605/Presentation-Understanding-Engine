@@ -6,7 +6,11 @@ AUDIO_DIR = Path("data/audio")
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 def synthesize_speech(text: str, language: str) -> str:
-    audio_path = AUDIO_DIR / f"{uuid.uuid4()}.mp3"
+    text = text.strip()
+    if not text:
+        raise ValueError("TTS text is empty")
+
+    audio_path = AUDIO_DIR / f"{uuid.uuid4()}.wav"
 
     voice_map = {
         "en": "en-US-AriaNeural",

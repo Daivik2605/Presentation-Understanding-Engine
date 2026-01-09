@@ -7,7 +7,6 @@ from app.services.tts_service import synthesize_speech  # you created this
 from app.services.video_assembler import create_video
 from app.services.video_stitcher import stitch_videos
 
-
 def process_ppt_to_video(ppt_path: str, language: str = "en", max_slides: int = 5) -> Dict:
     slides = [s for s in parse_ppt(ppt_path) if s["has_text"]][:max_slides]
 
@@ -18,7 +17,10 @@ def process_ppt_to_video(ppt_path: str, language: str = "en", max_slides: int = 
         slide_text = slide["text"]
 
         narration = str(
-            narration_chain.invoke({"slide_text": slide_text, "language": language})
+            narration_chain.invoke({
+                "slide_text": slide_text,
+                "language": language
+            })
         )
 
         image_path = render_slide_image(slide_text)
@@ -36,7 +38,14 @@ def process_ppt_to_video(ppt_path: str, language: str = "en", max_slides: int = 
             "video_path": video_path
         })
 
-    final_video_path = stitch_videos(slide_videos) if slide_videos else None
+    # 🔍 DEBUG (keep for now)
+    print("Slide videos:", slide_videos)
+
+    final_video_path = None
+    if slide_videos:
+        print("Stitching videos now...")
+        final_video_path = stitch_videos(slide_videos)
+        print("Final video created:", final_video_path)
 
     return {
         "slides": slide_outputs,

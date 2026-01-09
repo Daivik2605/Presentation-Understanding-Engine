@@ -14,6 +14,7 @@ def process_ppt(ppt_path: str, language: str="en", max_slides: int=1) -> list[di
     - Generates Q&A
     """
     # slides = parse_ppt(ppt_path)
+    max_slides=3
     slides = [s for s in parse_ppt(ppt_path) if s["has_text"]][:max_slides]
     results = []
 
@@ -38,6 +39,7 @@ def process_ppt(ppt_path: str, language: str="en", max_slides: int=1) -> list[di
                     "language": language
                 })
             )
+            
 
             slide_result["narration"] = narration
             # Phase 9 — Video generation
