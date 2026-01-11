@@ -37,9 +37,7 @@ export function SlideViewer({ slides }: SlideViewerProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">
-              Slide {currentSlide + 1}: {slide.title || 'Untitled'}
-            </CardTitle>
+            <CardTitle className="text-lg">Slide {currentSlide + 1}</CardTitle>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
