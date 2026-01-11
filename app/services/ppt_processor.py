@@ -13,8 +13,6 @@ def process_ppt(ppt_path: str, language: str="en", max_slides: int=1) -> list[di
     - Generates narration
     - Generates Q&A
     """
-    # slides = parse_ppt(ppt_path)
-    max_slides=3
     slides = [s for s in parse_ppt(ppt_path) if s["has_text"]][:max_slides]
     results = []
 

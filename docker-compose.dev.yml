@@ -1,0 +1,62 @@
+version: '3.8'
+
+# Development Docker Compose - with hot reload
+services:
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ppt-engine-ollama-dev
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # FastAPI Backend with hot reload
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ppt-engine-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.1:8b
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=http://localhost:3000
+    volumes:
+      - ./app:/app/app
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # Next.js Frontend with hot reload
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: ppt-engine-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/app:/app/app
+      - ./frontend/components:/app/components
+      - ./frontend/lib:/app/lib
+      - ./frontend/hooks:/app/hooks
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+
+networks:
+  default:
+    name: ppt-engine-network-dev

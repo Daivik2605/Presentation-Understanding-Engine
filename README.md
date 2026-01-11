@@ -1,125 +1,352 @@
 # Presentation Understanding Engine
 
-An AI-powered backend system that performs **semantic understanding of PowerPoint presentations** to automatically generate:
-- teacher-style narrated explanations
-- structured multiple-choice assessments (MCQs)
+An AI-powered system that performs **semantic understanding of PowerPoint presentations** to automatically generate:
+- 🎙️ Teacher-style narrated video lectures
+- 📝 Structured multiple-choice assessments (MCQs)
+- 🎬 Professional video output with TTS narration
 
 Designed for **EdTech**, **training automation**, and **instructional content pipelines**.
 
 ---
 
-## Overview
+## ✨ Features
 
-The **Presentation Understanding Engine** ingests PowerPoint (`.pptx`) files and applies large language models (LLMs) to understand slide-level content.
-
-From this understanding, it automatically produces:
-- concise instructional narration (not verbatim repetition)
-- evaluative MCQs with difficulty levels in strict JSON format
-
-The system is exposed via a **FastAPI backend** and returns structured outputs suitable for LMS platforms, assessment systems, or downstream APIs.
-
----
-
-## Key Capabilities
-
-- Upload PowerPoint files via REST API
-- Robust slide text extraction (handles empty or image-only slides)
-- AI-generated narration using LLMs
-- AI-generated MCQs with schema-safe JSON output
-- Slide-level semantic understanding for explanation and assessment
-- Modular orchestration layer (parser, AI chains, processor)
-- FastAPI backend with interactive Swagger UI
-- Local LLM inference using Ollama (cloud-ready design)
-- Multilingual support (English, French, Hindi)
+- **Smart Parsing**: Robust slide text extraction (handles empty or image-only slides)
+- **AI Narration**: LLM-generated teacher-style explanations (not verbatim repetition)
+- **Video Generation**: Automatic video lectures with TTS and slide images
+- **Quiz Generation**: MCQs with difficulty levels in strict JSON format
+- **Multilingual**: English, French, and Hindi support
+- **Real-time Progress**: WebSocket-based live updates during processing
+- **Modern UI**: Next.js frontend with beautiful Tailwind CSS design
+- **Docker Ready**: Production-ready containerized deployment
 
 ---
 
-## Architecture (High Level)
+## 🏗️ Architecture
 
-PPT Upload
-↓
-Slide Text Extraction
-↓
-LLM-based Semantic Understanding
-├── Narration Generation
-└── Q&A Generation
-↓
-Structured JSON Output (API Response)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Frontend (Next.js)                        │
+│  ┌─────────┐  ┌─────────────┐  ┌──────────────┐  ┌───────────┐  │
+│  │ Upload  │  │ Processing  │  │   Results    │  │   Quiz    │  │
+│  │  Page   │  │    Page     │  │    Page      │  │   Mode    │  │
+│  └────┬────┘  └──────┬──────┘  └──────┬───────┘  └───────────┘  │
+└───────┼──────────────┼────────────────┼─────────────────────────┘
+        │              │                │
+        ▼              ▼                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      FastAPI Backend                             │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
+│  │  REST API   │  │  WebSocket   │  │    Job Manager          │ │
+│  │  Endpoints  │  │   Handler    │  │  (Async Processing)     │ │
+│  └──────┬──────┘  └──────┬───────┘  └───────────┬─────────────┘ │
+└─────────┼────────────────┼──────────────────────┼───────────────┘
+          │                │                      │
+          ▼                ▼                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Processing Pipeline                          │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────────┐  │
+│  │   PPT     │  │ Narration │  │    TTS    │  │    Video     │  │
+│  │  Parser   │→ │   Chain   │→ │  Service  │→ │  Assembler   │  │
+│  └───────────┘  └───────────┘  └───────────┘  └──────────────┘  │
+│                      ↓                                           │
+│               ┌───────────┐                                      │
+│               │   MCQ     │                                      │
+│               │   Chain   │                                      │
+│               └───────────┘                                      │
+└─────────────────────────────────────────────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         Ollama LLM                               │
+│                    (llama3.1:8b or similar)                        │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Python**
-- **FastAPI** (API layer)
-- **LangChain** (RunnableSequence for prompt orchestration)
-- **Ollama** (local LLM inference)
-- **python-pptx** (PowerPoint parsing)
+### Backend
+- **Python 3.11+**
+- **FastAPI** - High-performance API framework
+- **LangChain** - LLM orchestration
+- **Ollama** - Local LLM inference
+- **python-pptx** - PowerPoint parsing
+- **edge-tts** - Microsoft neural TTS
+- **FFmpeg** - Video processing
+- **Pillow** - Image processing
+
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **shadcn/ui** - Beautiful component library
+- **React Query** - Server state management
+- **Framer Motion** - Animations
+
+### DevOps
+- **Docker & Docker Compose** - Containerization
+- **Nginx** - Reverse proxy
+- **GitHub Actions** - CI/CD (optional)
 
 ---
 
-## Getting Started (Local Setup)
-### 1. Clone the Repository
----
+## 🚀 Quick Start
 
-````md
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
 git clone https://github.com/Daivik2605/presentation-understanding-engine.git
 cd presentation-understanding-engine
-````
 
-### 2. Create and Activate Virtual Environment
+# Start with Docker Compose
+docker-compose up -d
+
+# Pull the LLM model (first time only)
+docker exec -it ppt-engine-ollama ollama pull llama3.1:8b
+```
+
+The application will be available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
+### Option 2: Local Development
+
+#### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- FFmpeg
+- Ollama
+
+#### Backend Setup
 
 ```bash
-python3 -m venv venv
+# Create virtual environment
+python -m venv venv
+
+# Activate (Windows)
+venv\Scripts\activate
+# Activate (Linux/Mac)
 source venv/bin/activate
-```
 
-### 3. Install Dependencies
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 4. Start Ollama
+# Copy environment file
+copy .env.example .env  # Windows
+cp .env.example .env    # Linux/Mac
 
-```bash
+# Start Ollama and pull model
 ollama serve
-```
+ollama pull llama3.1:8b
 
-Ensure the required model (e.g., `llama3:8b`) is available in Ollama.
-
-### 5. Run the API Server
-
-```bash
+# Run the backend
 uvicorn app.main:app --reload
 ```
 
-### 6. Open Swagger UI
-
-```
-http://127.0.0.1:8000/docs
-```
-
-````
-
----
-
-## Why this fixes it
-
-- Closed all code blocks correctly
-- Removed stray `'''`
-- Ensured numbering renders properly
-- Ensured GitHub Markdown compatibility
-
----
-
-## Next step
-
-After replacing this section:
+#### Frontend Setup
 
 ```bash
-git add README.md
-git commit -m "Fix README setup instructions formatting"
-git push
-````
+cd frontend
+
+# Install dependencies
+npm install
+
+# Copy environment file
+copy .env.example .env.local  # Windows
+cp .env.example .env.local    # Linux/Mac
+
+# Run the frontend
+npm run dev
+```
+
+---
+
+## 📁 Project Structure
+
+```
+presentation-understanding-engine/
+├── app/
+│   ├── api/
+│   │   ├── health.py          # Health check endpoint
+│   │   ├── process.py         # Upload & processing endpoint
+│   │   ├── jobs.py            # Job management endpoints
+│   │   └── websocket.py       # WebSocket for progress updates
+│   ├── core/
+│   │   ├── config.py          # Pydantic settings
+│   │   ├── logging.py         # Structured logging
+│   │   └── exceptions.py      # Custom exceptions
+│   ├── models/
+│   │   └── job.py             # Job & progress models
+│   ├── services/
+│   │   ├── ppt_parser.py      # PowerPoint extraction
+│   │   ├── narration_chain.py # LLM narration generation
+│   │   ├── qa_chain.py        # LLM MCQ generation
+│   │   ├── tts_service.py     # Text-to-speech
+│   │   ├── slide_renderer.py  # Slide image rendering
+│   │   ├── video_assembler.py # Individual slide videos
+│   │   ├── video_stitcher.py  # Final video assembly
+│   │   ├── job_manager.py     # Job tracking
+│   │   └── async_processor.py # Async processing pipeline
+│   └── main.py                # FastAPI application
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx           # Home page
+│   │   ├── upload/            # Upload page
+│   │   ├── processing/        # Processing progress page
+│   │   └── results/           # Results display page
+│   ├── components/
+│   │   ├── ui/                # shadcn/ui components
+│   │   ├── upload/            # Upload components
+│   │   ├── processing/        # Progress components
+│   │   └── results/           # Result components
+│   ├── hooks/                 # Custom React hooks
+│   └── lib/                   # Utilities & API client
+├── storage/
+│   ├── uploads/               # Uploaded files
+│   ├── outputs/               # Generated outputs
+│   └── temp/                  # Temporary files
+├── docker-compose.yml         # Production Docker setup
+├── docker-compose.dev.yml     # Development Docker setup
+├── Dockerfile                 # Backend container
+├── nginx.conf                 # Nginx configuration
+└── requirements.txt           # Python dependencies
+```
+
+---
+
+## 🔧 Configuration
+
+### Backend Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
+| `OLLAMA_MODEL` | `llama3.1:8b` | LLM model to use |
+| `TTS_VOICE_EN` | `en-US-AriaNeural` | English TTS voice |
+| `TTS_VOICE_FR` | `fr-FR-DeniseNeural` | French TTS voice |
+| `TTS_VOICE_HI` | `hi-IN-SwaraNeural` | Hindi TTS voice |
+| `VIDEO_FPS` | `1` | Video frames per second |
+| `VIDEO_RESOLUTION` | `1920x1080` | Video resolution |
+| `MAX_SLIDES` | `20` | Maximum slides to process |
+| `MAX_FILE_SIZE_MB` | `50` | Maximum upload file size |
+| `LOG_LEVEL` | `INFO` | Logging level |
+| `ENVIRONMENT` | `development` | Environment mode |
+
+### Frontend Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend API URL |
+
+---
+
+## 📖 API Documentation
+
+### REST Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/process` | Upload and process PPT |
+| `GET` | `/api/v1/jobs/{job_id}/status` | Get job status |
+| `GET` | `/api/v1/jobs/{job_id}/result` | Get job result |
+| `POST` | `/api/v1/jobs/{job_id}/cancel` | Cancel job |
+| `GET` | `/api/v1/jobs` | List all jobs |
+| `GET` | `/api/v1/health` | Health check |
+
+### WebSocket
+
+Connect to `/ws/jobs/{job_id}` for real-time progress updates.
+
+### Example Usage
+
+```python
+import requests
+
+# Upload a presentation
+with open("presentation.pptx", "rb") as f:
+    response = requests.post(
+        "http://localhost:8000/api/v1/process",
+        files={"file": f},
+        data={
+            "language": "en",
+            "max_slides": 10,
+            "generate_video": True,
+            "generate_mcqs": True
+        }
+    )
+
+job_id = response.json()["job_id"]
+
+# Check status
+status = requests.get(f"http://localhost:8000/api/v1/jobs/{job_id}/status")
+print(status.json())
+
+# Get results when complete
+result = requests.get(f"http://localhost:8000/api/v1/jobs/{job_id}/result")
+print(result.json())
+```
+
+---
+
+## 🎨 Screenshots
+
+### Home Page
+Modern landing page with feature highlights and call-to-action.
+
+### Upload Page
+Drag & drop interface with language selection and processing options.
+
+### Processing Page
+Real-time progress tracking with WebSocket updates for each slide.
+
+### Results Page
+- **Slides Tab**: Browse slides with narration and audio playback
+- **Video Tab**: Watch the complete video lecture
+- **Quiz Tab**: Interactive MCQ quiz mode with scoring
+- **Export Tab**: Download all generated content
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run backend tests
+pytest
+
+# Run with coverage
+pytest --cov=app
+
+# Run frontend tests
+cd frontend
+npm test
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [LangChain](https://langchain.com/) for LLM orchestration
+- [Ollama](https://ollama.ai/) for local LLM inference
+- [shadcn/ui](https://ui.shadcn.com/) for beautiful components
+- [Microsoft Edge TTS](https://github.com/rany2/edge-tts) for neural voices
 
