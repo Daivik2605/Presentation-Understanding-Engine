@@ -1,110 +1,181 @@
-This project is a tool that turns ordinary PowerPoint and PDF presentations into ready‑to‑use training lessons. You upload a deck, and the system automatically reads each slide or page, extracts the key ideas, and writes clear summaries. It then generates a voiceover, making the slides a narrated lesson, and can also create quiz questions to check understanding. This is especially useful for HR, learning and development teams, and managers who need to turn existing slide decks into consistent, engaging onboarding or training materials without manually rewriting content, recording audio, or designing quizzes from scratch.
+# Presentation Understanding Engine  
+*Turn slide decks and PDFs into narrated, lesson‑style videos with summaries and optional quizzes.*
 
-# Lecture Forge
+## Overview
 
-Lecture Forge is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons, per-slide/page summaries, and optional quiz questions using local LLM + TTS tooling. It is designed for teams who want repeatable, automated content production without manual video editing or external SaaS dependencies.
+Presentation Understanding Engine is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons. It extracts slide/page content, produces summaries, generates narration using local TTS, and can optionally create quiz questions using a local or pluggable LLM.
 
-## Who This Is For / What It Solves
+### Key Capabilities
 
-- Learning and enablement teams producing training content at scale.
-- Product teams embedding document-to-video workflows into internal tools.
-- Developers who want a local-first pipeline for structured narration and video generation.
-
-## Architecture Overview
-
-- **Frontend (Next.js)** handles upload, progress, and results.
-- **Backend (FastAPI)** orchestrates jobs, pipelines, and storage.
-- **Pipelines** process PPT or PDF inputs with LLM narration, optional MCQs, TTS, and FFmpeg stitching.
-- **Storage** persists uploads, intermediate assets, and final outputs under `data/` and `storage/`.
-
-Detailed docs: `docs/architecture.md`, `docs/pipelines.md`, `docs/api.md`.
+- Upload PPT/PPTX or PDF documents from a simple web UI.
+- Parse slides/pages and extract structured content.
+- Generate per‑slide/page summaries and narration scripts.
+- Synthesize narration via local or pluggable TTS.
+- Optionally generate quiz questions using a local LLM.
+- Produce a stitched, narrated “video‑lesson” output.
 
 ## Features
 
-- PPT pipeline with slide parsing, narration, per-slide clips, and stitched video.
-- PDF pipeline with page summaries, narration, and optional MCQs.
-- Policy mode for long-form PDF/TXT chunking and narrated output.
-- Live progress updates via WebSocket + polling.
-- Local LLM via Ollama and speech synthesis via edge-tts.
-- Clean upload → processing → results UI.
+- End‑to‑end pipeline: upload → parse → summarize → narrate → render.
+- Local‑first AI integrations (LLM + TTS) with configurable providers.
+- Real‑time job progress and result display in the UI.
+- Clear separation of backend orchestration and frontend experience.
 
-## Tech Stack
+## Architecture
 
-- **Backend:** FastAPI, Pydantic Settings, Ollama, edge-tts, FFmpeg, Pillow
-- **Frontend:** Next.js (App Router), React Query, Tailwind CSS, shadcn/ui
-- **Infra:** Docker Compose, Nginx (optional)
+The system is split into a Next.js frontend and a FastAPI backend, with local storage for intermediate assets and outputs. A typical request flow is:
 
-## Local Setup (Development)
+**Browser → Next.js → FastAPI → LLM/TTS + Storage → Frontend results**
 
-Prerequisites:
-- Python 3.11+
-- Node.js 20+
-- FFmpeg
-- Ollama
+High‑level components:
+
+- **Frontend (Next.js):** Upload UI, progress tracking, results visualization.
+- **Backend (FastAPI):** File ingestion, parsing, orchestration, pipeline execution.
+- **LLM + TTS:** Pluggable local providers for summary, narration, and quizzes.
+- **Storage:** Source files, intermediate assets, and final outputs.
+
+## Project Structure
+
+```text
+.
+├── backend/           # FastAPI application (API, services, LLM/TTS integration)
+├── frontend/          # Next.js application (UI for upload and results)
+├── data/              # Intermediate runtime data (local dev only)
+├── docs/              # Architecture, configuration, and operational docs
+├── samples/           # Example PPT/PPTX and PDF files
+├── scripts/           # Helper scripts (dev, maintenance, profiling)
+├── storage/           # Generated artifacts (local dev only; gitignored)
+├── logs/              # Log output (local dev only; gitignored)
+├── docker-compose.yml
+├── LICENSE
+└── README.md
+```
+
+## Getting Started
+
+### Prerequisites
 
 Backend:
+- Python 3.11+
+- pip / virtualenv
+
+Frontend:
+- Node.js 18+ (20+ recommended)
+- npm / yarn / pnpm
+
+Optional:
+- Docker + Docker Compose (if running via containers)
+
+### Installation
+
+```bash
+git clone <repo-url>
+cd Presentation-Understanding-Engine
+```
+
+Backend setup:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements/requirements.txt
-cp backend/.env.example backend/.env
-ollama serve
-ollama pull llama3.1:8b
+```
+
+Frontend setup:
+
+```bash
+cd frontend
+npm install
+```
+
+### Environment Configuration
+
+Backend:
+
+- Copy `backend/.env.example` to `backend/.env`
+- Configure LLM/TTS provider settings, storage paths, limits, etc.
+
+Frontend:
+
+- Copy `frontend/.env.example` to `frontend/.env.local`
+- Set the backend base URL and any client‑side config.
+
+### Running Locally
+
+Backend (from repo root):
+
+```bash
 uvicorn backend.app.main:app --reload
 ```
 
 Frontend:
+
 ```bash
 cd frontend
-npm install
-cp .env.example .env.local
 npm run dev
 ```
 
-## Local Setup (Production)
+Open in browser:
 
-```bash
-docker-compose up -d
-```
+- Frontend UI: http://localhost:3000  
+- Backend API: http://localhost:8000  
 
-Services:
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8000`
+## Usage
 
-## How to Run
+1. Start backend and frontend.
+2. Open the web UI.
+3. Upload a PPT/PPTX or PDF (see `samples/` for test files).
+4. Configure options (summaries, narration, quizzes).
+5. Run the pipeline.
+6. View per‑slide/page results and download the narrated output.
 
-Backend (from repo root):
-```bash
-uvicorn backend.app.main:app --reload
-```
+Generated artifacts are stored in `storage/` for local development and are typically gitignored.
 
-Frontend (from `frontend/`):
-```bash
-npm run dev
-```
+## Tech Stack
 
-## Screenshots
+**Backend**
+- FastAPI
+- Python 3.11+
+- Pydantic settings and structured config
 
-See `docs/screenshots/` for placeholders.
+**Frontend**
+- Next.js
+- React
+- TypeScript (if enabled)
 
-![Upload](docs/screenshots/upload.png)
-![Processing](docs/screenshots/processing.png)
-![Results](docs/screenshots/results.png)
+**AI**
+- Local or pluggable LLM provider for summaries/quizzes
+- Local or pluggable TTS provider for narration
 
-## Known Limitations
+## Testing & Quality
 
-- PDF quality depends on text extraction; scanned PDFs may require OCR.
-- Large decks increase processing time; defaults target small/medium inputs.
-- Outputs are local-file based by default (no object storage integration).
+- Unit and integration tests target FastAPI endpoints and pipelines.
+- Frontend testing focuses on critical flows (upload, progress, results).
+- Linting/formatting (planned or recommended):
+  - Python: Ruff + Black
+  - Frontend: ESLint + Prettier
+
+### CI (planned or recommended)
+
+On each push/PR:
+- Run backend tests
+- Lint backend and frontend
+- Check formatting
 
 ## Roadmap
 
-Planned enhancements live in `docs/roadmap.md`.
+- Async/background job queue for long‑running processing.
+- Improved slide segmentation and content heuristics.
+- Advanced quiz generation and answer validation.
+- User accounts and persisted projects.
+- Observability: logging, metrics, tracing.
 
-## Project Status
+## Contributing
 
-Active development. Core upload → processing → results flow is stable for local use.
+- Open issues for bugs, feature requests, or questions.
+- Submit PRs with clear descriptions and test coverage.
+- Run linting/formatting and tests before opening a PR.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT — see `LICENSE`.
