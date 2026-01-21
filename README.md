@@ -1,6 +1,6 @@
-# Presentation Understanding Engine
+# Lecture Forge
 
-Presentation Understanding Engine is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons, per-slide/page summaries, and optional quiz questions using local LLM + TTS tooling. It is designed for teams who want repeatable, automated content production without manual video editing or external SaaS dependencies.
+Lecture Forge is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons, per-slide/page summaries, and optional quiz questions using local LLM + TTS tooling. It is designed for teams who want repeatable, automated content production without manual video editing or external SaaS dependencies.
 
 ## Who This Is For / What It Solves
 
