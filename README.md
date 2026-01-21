@@ -1,3 +1,5 @@
+This project is a tool that turns ordinary PowerPoint and PDF presentations into ready‑to‑use training lessons. You upload a deck, and the system automatically reads each slide or page, extracts the key ideas, and writes clear summaries. It then generates a voiceover, making the slides a narrated lesson, and can also create quiz questions to check understanding. This is especially useful for HR, learning and development teams, and managers who need to turn existing slide decks into consistent, engaging onboarding or training materials without manually rewriting content, recording audio, or designing quizzes from scratch.
+
 # Lecture Forge
 
 Lecture Forge is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons, per-slide/page summaries, and optional quiz questions using local LLM + TTS tooling. It is designed for teams who want repeatable, automated content production without manual video editing or external SaaS dependencies.
