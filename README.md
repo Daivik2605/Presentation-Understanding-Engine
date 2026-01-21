@@ -5,6 +5,8 @@
 
 Presentation Understanding Engine is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons. It extracts slide/page content, produces summaries, generates narration using local TTS, and can optionally create quiz questions using a local or pluggable LLM.
 
+**Project status:** Early-stage but functional prototype, actively developed.
+
 ### Key Capabilities
 
 - Upload PPT/PPTX or PDF documents from a simple web UI.
@@ -21,6 +23,20 @@ Presentation Understanding Engine is a FastAPI + Next.js system that converts PP
 - Real‑time job progress and result display in the UI.
 - Clear separation of backend orchestration and frontend experience.
 
+## Models & Configuration
+
+The engine is designed to work with pluggable LLM and TTS backends. You can run fully local processing or connect to external APIs depending on your environment, with local‑only processing as the default assumption.
+
+At a minimum, you should configure:
+
+- `LLM_PROVIDER` – Identifier for the LLM backend (e.g., `local`, `openai_compatible`).
+- `LLM_MODEL_PATH` or `LLM_MODEL_NAME` – Local path or model name, depending on provider.
+- `TTS_PROVIDER` – Identifier for the TTS backend.
+- `TTS_VOICE` – Voice or speaker ID to use.
+- `MAX_TOKENS`, `TEMPERATURE` – Optional generation parameters.
+
+See `.env.example` for the complete list of supported variables. For large decks or long documents, a higher‑end CPU and/or GPU is recommended for reasonable processing time.
+
 ## Architecture
 
 The system is split into a Next.js frontend and a FastAPI backend, with local storage for intermediate assets and outputs. A typical request flow is:
@@ -33,6 +49,17 @@ High‑level components:
 - **Backend (FastAPI):** File ingestion, parsing, orchestration, pipeline execution.
 - **LLM + TTS:** Pluggable local providers for summary, narration, and quizzes.
 - **Storage:** Source files, intermediate assets, and final outputs.
+
+## API Overview
+
+Core functionality is exposed via FastAPI endpoints that the frontend consumes, and other services can integrate programmatically.
+
+- `POST /api/v1/process` – Upload a PPT/PPTX or PDF and start processing.
+- `GET /api/v1/jobs/{job_id}/status` – Retrieve processing status.
+- `GET /api/v1/jobs/{job_id}/result` – Retrieve results (summaries, audio, outputs).
+- `GET /api/v1/health` – Health check endpoint.
+
+If FastAPI docs are enabled, the OpenAPI schema is available at `/docs` or `/redoc`.
 
 ## Project Structure
 
@@ -131,6 +158,10 @@ Open in browser:
 
 Generated artifacts are stored in `storage/` for local development and are typically gitignored.
 
+### How presentations are processed
+
+PPT/PPTX and PDF files are parsed into slides or pages. The LLM typically operates at slide/page granularity, with optional batching for efficiency on longer documents. When text is long, it is chunked into smaller segments before summarization and question generation, and outputs are assembled per slide/page or chunk. Large decks can take noticeably longer to process; work is sequential or batched depending on implementation and available resources.
+
 ## Tech Stack
 
 **Backend**
@@ -149,11 +180,9 @@ Generated artifacts are stored in `storage/` for local development and are typic
 
 ## Testing & Quality
 
-- Unit and integration tests target FastAPI endpoints and pipelines.
-- Frontend testing focuses on critical flows (upload, progress, results).
-- Linting/formatting (planned or recommended):
-  - Python: Ruff + Black
-  - Frontend: ESLint + Prettier
+- Current status: Basic tests for core backend endpoints (and/or tests still to be expanded).
+- Planned: Expand unit and integration coverage, add frontend tests, and enforce linting in CI.
+- Linting/formatting (planned or recommended): Python with Ruff + Black; frontend with ESLint + Prettier.
 
 ### CI (planned or recommended)
 
@@ -162,6 +191,32 @@ On each push/PR:
 - Lint backend and frontend
 - Check formatting
 
+### Running tests
+
+```bash
+# Backend tests
+pytest
+
+# Frontend tests (if configured)
+npm test
+```
+
+## Limitations & Trade‑offs
+
+- Large presentations can be slow to process when running fully local pipelines.
+- Summary and quiz quality depends on the chosen model and input formatting.
+- Multi‑language support may be limited if the model is primarily trained on English.
+- Complex slide layouts or image‑heavy decks can reduce extraction accuracy.
+- Audio naturalness varies by TTS backend and voice configuration.
+- Larger models require significant RAM/VRAM and CPU resources.
+
+## Security & Privacy
+
+- By default, processing is intended to run locally without sending files to third‑party services.
+- Uploaded files and outputs are stored under `storage/` for local development; clean this directory regularly.
+- If handling sensitive decks, ensure `LLM_PROVIDER` and `TTS_PROVIDER` are configured for local processing.
+- This project is a prototype and not a security‑hardened product; production deployments should add access control, encryption at rest, and audit logging.
+
 ## Roadmap
 
 - Async/background job queue for long‑running processing.
@@ -169,6 +224,21 @@ On each push/PR:
 - Advanced quiz generation and answer validation.
 - User accounts and persisted projects.
 - Observability: logging, metrics, tracing.
+
+## Deployment
+
+You can run the project via Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+Environment variables can be set via `.env` files or environment‑specific configuration. For local models and TTS, a modern CPU and ample RAM are recommended; a GPU can significantly reduce processing time for larger workloads.
+
+For production deployments, consider:
+- Running backend and frontend as separate services.
+- Using HTTPS and a reverse proxy.
+- Setting up logs, metrics, and health checks.
 
 ## Contributing
 
