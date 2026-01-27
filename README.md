@@ -103,13 +103,4 @@ LectureForge is built with a **Privacy-First** philosophy. When using local prov
 
 MIT — see `LICENSE`.
 
-```
 
----
-
-### **Next Step**
-Now that your documentation is complete and your code is pushed, we can start on the **Redis integration**. This will solve the "WebSocket disconnected" and "Timeout" issues you were seeing by allowing the backend to work on the video while the frontend just waits for status updates.
-
-**Would you like me to provide the `redis` service block for your `docker-compose.yml` and the updated `app/core/redis.py` client?**
-
-```
