@@ -1,266 +1,118 @@
+
+
+```markdown
 # LectureForge  
 [![CI](https://github.com/Daivik2605/LectureForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Daivik2605/LectureForge/actions)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/Daivik2605/LectureForge/actions)
-*Turn slide decks and PDFs into narrated, lesson‑style videos with summaries and optional quizzes.*
 
-## Overview
+*Turn slide decks and PDFs into narrated, lesson‑style videos or immersive narrative journeys.*
 
-LectureForge is a FastAPI + Next.js system that converts PPT/PPTX and PDF documents into narrated video lessons. It extracts slide/page content, produces summaries, generates narration using local TTS, and can optionally create quiz questions using a local or pluggable LLM.
+## 📖 Overview
 
-## 🎥 Live Demo
+LectureForge is a FastAPI + Next.js system that converts PPT/X and PDF documents into narrated video content. By leveraging local LLMs and TTS engines, it extracts document content, produces AI-driven scripts, and renders a fully stitched video lesson.
 
-![Upload and generate interface](screenshots/upload-demo.png)
-![Results with narrated lesson preview](screenshots/results-demo.png)
+**Project Status:** Stable containerized prototype. Now expanding into **StoryGenerator** capabilities.
 
-*(Add your actual screenshots here - upload → processing → narrated lesson output)*
+## 🚀 Quick Start (Docker)
 
-**Project status:** Early-stage but functional prototype, actively developed.
+The professional way to run LectureForge is via Docker Compose. This ensures all system dependencies (FFmpeg, LibreOffice) and the AI engine (Ollama) are perfectly configured.
 
-### Key Capabilities
-
-- Upload PPT/PPTX or PDF documents from a simple web UI.
-- Parse slides/pages and extract structured content.
-- Generate per‑slide/page summaries and narration scripts.
-- Synthesize narration via local or pluggable TTS.
-- Optionally generate quiz questions using a local LLM.
-- Produce a stitched, narrated “video‑lesson” output.
-
-## Features
-
-- End‑to‑end pipeline: upload → parse → summarize → narrate → render.
-- Local‑first AI integrations (LLM + TTS) with configurable providers.
-- Real‑time job progress and result display in the UI.
-- Clear separation of backend orchestration and frontend experience.
-
-## Models & Configuration
-
-LectureForge works with pluggable local/cloud LLM + TTS backends:
-
-**Required environment variables:**
-- `LLM_PROVIDER` – `local` or `openai_compatible`
-- `LLM_MODEL_PATH` – Local GGUF model path or API model name
-- `TTS_PROVIDER` – `local` or cloud TTS service
-- `TTS_VOICE` – Voice identifier
-
-**Hardware recommendations:**
-- CPU: 8GB+ RAM for small models
-- GPU: 12GB+ VRAM recommended for 7B+ models
-- Large decks (50+ slides): 30-60s processing time per slide
-
-See `.env.example` for full configuration.
-
-## Architecture
-
-The system is split into a Next.js frontend and a FastAPI backend, with local storage for intermediate assets and outputs. A typical request flow is:
-
-**Browser → Next.js → FastAPI → LLM/TTS + Storage → Frontend results**
-
-High‑level components:
-
-- **Frontend (Next.js):** Upload UI, progress tracking, results visualization.
-- **Backend (FastAPI):** File ingestion, parsing, orchestration, pipeline execution.
-- **LLM + TTS:** Pluggable local providers for summary, narration, and quizzes.
-- **Storage:** Source files, intermediate assets, and final outputs.
-
-## API Overview
-
-Core functionality is exposed via FastAPI endpoints that the frontend consumes, and other services can integrate programmatically.
-
-- `POST /api/v1/process` – Upload a PPT/PPTX or PDF and start processing.
-- `GET /api/v1/jobs/{job_id}/status` – Retrieve processing status.
-- `GET /api/v1/jobs/{job_id}/result` – Retrieve results (summaries, audio, outputs).
-- `GET /api/v1/health` – Health check endpoint.
-
-If FastAPI docs are enabled, the OpenAPI schema is available at `/docs` or `/redoc`.
-
-## Project Structure
-
-```text
-LectureForge
-├── backend/           # FastAPI application (API, services, LLM/TTS integration)
-├── frontend/          # Next.js application (UI for upload and results)
-├── data/              # Data utilities or configuration
-├── docs/              # Additional documentation (architecture, API, etc.)
-├── samples/           # Example PPT/PPTX and PDF files
-├── scripts/           # Helper scripts (dev, maintenance, etc.)
-├── storage/           # Generated artifacts (local dev only; gitignored)
-├── logs/              # Log output (local dev only; gitignored)
-├── docker-compose.yml # Docker orchestration
-├── docker-compose.dev.yml
-├── nginx.conf
-├── LICENSE
-├── README.md
-└── ...other root files
-```
-
-## Getting Started
-
-### Prerequisites
-
-Backend:
-- Python 3.11+
-- pip / virtualenv
-
-Frontend:
-- Node.js 18+ (20+ recommended)
-- npm / yarn / pnpm
-
-Optional:
-- Docker + Docker Compose (if running via containers)
-
-### Installation
-
+### 1. Start the Stack
 ```bash
 git clone <repo-url>
 cd LectureForge
+docker-compose up -d --build
+
 ```
 
-Backend setup:
+### 2. Initialize the AI Model
+
+Since models are large, they are not bundled in the image. You must pull your preferred model into the container once it's up:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r backend/requirements/requirements.txt
+# Recommended for MacBook Air (Fast & Efficient)
+docker exec -it lectureforge-ollama ollama pull llama3.2:3b
+
+# For Higher Accuracy (Requires 8GB+ RAM)
+docker exec -it lectureforge-ollama ollama pull llama3.1:8b
+
 ```
 
-Frontend setup:
+Access the UI at: **http://localhost:3000**
 
+---
+
+## ✨ Features
+
+* **Local-First AI:** All processing stays on your hardware via Ollama. No external API keys required.
+* **Narrative Personas:** Switch between **Professor** (educational summaries) and **Storyteller** (hero's journey narratives).
+* **Format Support:** High-fidelity extraction from `.pptx` and `.pdf` files.
+* **Async Processing:** (In Progress) Refactoring to Redis-backed queues for handling large 50+ page documents.
+
+## 🛠 Architecture
+
+LectureForge operates as a microservices ecosystem within a shared Docker network:
+
+* **Frontend (Next.js):** React interface for uploads, progress tracking, and video playback.
+* **Backend (FastAPI):** Orchestrates the pipeline: extraction → LLM scripting → TTS synthesis → FFmpeg rendering.
+* **AI Engine (Ollama):** Serves the LLM locally on port 11434.
+* **Data Volume:** Persistent storage for your uploads and generated video artifacts.
+
+---
+
+## ⚙️ Configuration
+
+The system is pre-configured for Docker. Key environment variables in the `backend` service include:
+
+| Variable | Default (Docker) | Description |
+| --- | --- | --- |
+| `OLLAMA_BASE_URL` | `http://ollama:11434` | Internal DNS for the AI service. |
+| `OLLAMA_MODEL` | `llama3.2:3b` | The model used for scripts & quizzes. |
+| `CORS_ORIGINS` | `["http://localhost:3000"]` | Allowed frontend communication. |
+
+---
+
+## 🧪 Testing the Pipeline
+
+To verify the setup without using your own documents, use the included test generator:
+
+1. **Generate Test PDF:**
 ```bash
-cd frontend
-npm install
+pip install reportlab
+python scripts/generate_test_pdf.py
+
 ```
 
-### Environment Configuration
 
-Backend:
+2. **Upload:** Use the resulting `ai_lecture_test.pdf` in the web UI.
+3. **Monitor:** Run `docker-compose logs -f backend` to watch the AI generate the narration in real-time.
 
-- Copy `backend/.env.example` to `backend/.env`
-- Configure LLM/TTS provider settings, storage paths, limits, etc.
+---
 
-Frontend:
+## 🗺 Roadmap
 
-- Copy `frontend/.env.example` to `frontend/.env.local`
-- Set the backend base URL and any client‑side config.
+* [ ] **Redis Task Queue:** Offload heavy video rendering to background workers to prevent UI timeouts.
+* [ ] **Story Mode Toggle:** Add a UI switch to change LLM prompts from "Lecture" to "Storytelling."
+* [ ] **Multi-Model Benchmarking:** Integrated scripts to compare speed/quality of Llama, Mistral, and GPT-4.
+* [ ] **Automated Progress Bars:** WebSocket integration for real-time per-slide status updates.
 
-### Running Locally
+## 🛡 Security & Privacy
 
-Backend (from repo root):
+LectureForge is built with a **Privacy-First** philosophy. When using local providers, your documents and generated videos never leave your local machine.
 
-```bash
-uvicorn backend.app.main:app --reload
-```
+*Note: This project is a development prototype. For production deployment, ensure you configure an Nginx reverse proxy with SSL.*
 
-Frontend:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Open in browser:
-
-- Frontend UI: http://localhost:3000  
-- Backend API: http://localhost:8000  
-
-## Usage
-
-1. Start backend and frontend.
-2. Open the web UI.
-3. Upload a PPT/PPTX or PDF (see `samples/` for test files).
-4. Configure options (summaries, narration, quizzes).
-5. Run the pipeline.
-6. View per‑slide/page results and download the narrated output.
-
-Generated artifacts are stored in `storage/` for local development and are typically gitignored.
-
-### How presentations are processed
-
-PPT/PPTX and PDF files are parsed into slides or pages. The LLM typically operates at slide/page granularity, with optional batching for efficiency on longer documents. When text is long, it is chunked into smaller segments before summarization and question generation, and outputs are assembled per slide/page or chunk. Large decks can take noticeably longer to process; work is sequential or batched depending on implementation and available resources.
-
-## Tech Stack
-
-**Backend**
-- FastAPI
-- Python 3.11+
-- Pydantic settings and structured config
-
-**Frontend**
-- Next.js
-- React
-- TypeScript (if enabled)
-
-**AI**
-- Local or pluggable LLM provider for summaries/quizzes
-- Local or pluggable TTS provider for narration
-
-## Testing & Quality
-
-- Current status: Basic tests for core backend endpoints (and/or tests still to be expanded).
-- Planned: Expand unit and integration coverage, add frontend tests, and enforce linting in CI.
-- Linting/formatting (planned or recommended): Python with Ruff + Black; frontend with ESLint + Prettier.
-
-### CI (planned or recommended)
-
-On each push/PR:
-- Run backend tests
-- Lint backend and frontend
-- Check formatting
-
-### Running tests
-
-```bash
-# Backend tests
-pytest
-
-# Frontend tests (if configured)
-npm test
-```
-
-## Limitations & Trade‑offs
-
-- Large presentations can be slow to process when running fully local pipelines.
-- Summary and quiz quality depends on the chosen model and input formatting.
-- Multi‑language support may be limited if the model is primarily trained on English.
-- Complex slide layouts or image‑heavy decks can reduce extraction accuracy.
-- Audio naturalness varies by TTS backend and voice configuration.
-- Larger models require significant RAM/VRAM and CPU resources.
-
-## Security & Privacy
-
-- By default, processing is intended to run locally without sending files to third‑party services.
-- Uploaded files and outputs are stored under `storage/` for local development; clean this directory regularly.
-- If handling sensitive decks, ensure `LLM_PROVIDER` and `TTS_PROVIDER` are configured for local processing.
-- This project is a prototype and not a security‑hardened product; production deployments should add access control, encryption at rest, and audit logging.
-
-## Roadmap
-
-- Async/background job queue for long‑running processing.
-- Improved slide segmentation and content heuristics.
-- Advanced quiz generation and answer validation.
-- User accounts and persisted projects.
-- Observability: logging, metrics, tracing.
-
-## Deployment
-
-You can run the project via Docker Compose:
-
-```bash
-docker-compose up -d
-```
-
-Environment variables can be set via `.env` files or environment‑specific configuration. For local models and TTS, a modern CPU and ample RAM are recommended; a GPU can significantly reduce processing time for larger workloads.
-
-For production deployments, consider:
-- Running backend and frontend as separate services.
-- Using HTTPS and a reverse proxy.
-- Setting up logs, metrics, and health checks.
-
-## Contributing
-
-- Open issues for bugs, feature requests, or questions.
-- Submit PRs with clear descriptions and test coverage.
-- Run linting/formatting and tests before opening a PR.
-
-## License
+## 📄 License
 
 MIT — see `LICENSE`.
+
+```
+
+---
+
+### **Next Step**
+Now that your documentation is complete and your code is pushed, we can start on the **Redis integration**. This will solve the "WebSocket disconnected" and "Timeout" issues you were seeing by allowing the backend to work on the video while the frontend just waits for status updates.
+
+**Would you like me to provide the `redis` service block for your `docker-compose.yml` and the updated `app/core/redis.py` client?**
+
+```
